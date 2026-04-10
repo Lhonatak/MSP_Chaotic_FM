@@ -16,7 +16,7 @@ $$
 
 where $x_n$ is the current state and $r$ is a control parameter you set with the **R** knob. By changing $r$ and the initial value of $x_n$, you move the system between three regimes — stable, periodic, and chaotic — each producing a fundamentally different character of modulation.
 
-![Bifurcation Diagram](assets/Bifurcation%20diagram.png)
+![Bifurcation Diagram](assets/Bifurcation.png)
 
 The bifurcation diagram above is your roadmap. The horizontal axis is $r$; the vertical axis shows where $x_n$ settles. A single line means a steady tone. Forks mean the modulator oscillates between discrete values. The dense black region on the right is chaos.
 
