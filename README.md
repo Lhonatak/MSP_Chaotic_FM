@@ -1,72 +1,114 @@
-# Chaotic Algorithm for FM Synthesis
+# Chaotic FM
 
-This project uses the **Logistic Map** (also known as the **Logistic Equation**) to generate a waveform for modulating an **FM synthesizer** in MAX MSP. The Logistic Map is a simple, non-linear iterative system that exhibits a wide range of behaviors, including stable points, periodic oscillations, and chaotic dynamics. This unpredictability makes it an interesting tool for generating modulating signals that add complexity and randomness to FM synthesis.
+A monophonic FM synthesizer for Max MSP that uses the **Logistic Map** as its modulation source, producing sounds that range from stable tonal textures to unpredictable, chaotic timbres.
 
+![Interface](assets/interface.png)
 
+---
 
-## Logistic Map Principles
+## How It Works
 
-The **Logistic Map** is a one-dimensional recurrence relation defined by the equation:
+Instead of a conventional sine-wave modulator, this synth feeds the output of a chaotic algorithm — the Logistic Map — into the frequency of a carrier oscillator. The Logistic Map is defined by:
 
-$$\ x_{n+1} = r \cdot x_n \cdot (1 - x_n) $$
-Where:
+$$
+x_{n+1} = r \cdot x_n \cdot (1 - x_n)
+$$
 
+where $x_n$ is the current state and $r$ is a control parameter you set with the **R** knob. By changing $r$ and the initial value of $x_n$, you move the system between three regimes — stable, periodic, and chaotic — each producing a fundamentally different character of modulation.
 
-- $x_{n}$ is the state of the system at iteration \( n \)
-- $r$ is a control parameter that determines the system's behavior (e.g., stability, periodicity, chaos),
-- $x_{n+1}$ is the next state of the system.
+![Bifurcation Diagram](assets/Bifurcation%20diagram.png)
 
-Similar to the idea of feedback FM, we can translate the output of the algorithm to waveform and use it to modulate the frequency of a basic shape carrier, adding controllable unpredictability and dynamics.
+The bifurcation diagram above is your roadmap. The horizontal axis is $r$; the vertical axis shows where $x_n$ settles. A single line means a steady tone. Forks mean the modulator oscillates between discrete values. The dense black region on the right is chaos.
 
-### Key Behaviors of the Logistic Map:
+---
 
-![Example Image](assets/Bifurcation.png)
+## Interface Layout
 
-- **Stable Points**: When $r$ is low (typically lower than 3), the system converges to a single point (either $x_{n} = 0$ or $x_{n} = 1$).
+The interface is split into three sections, each with its own role:
 
-- **Periodic Oscillations**: For certain values of $r$  (between 3 and 3.57), the system starts to exhibit periodic oscillations. For example, it may alternate between two values, then four, eight, etc.
+| Section | Location | Purpose |
+|---------|----------|---------|
+| **MOD** | Top-right | Controls the chaotic modulator (the Logistic Map engine) |
+| **CARRIER** | Middle-right | Selects the carrier waveform, envelope, and output level |
+| **GLOBAL PITCH** | Bottom-left | Transpose, glide, and pitch-shift quality |
 
-- **Chaos**: When $r$  is greater than 3.57, the system exhibits chaotic behavior, where tiny changes in initial conditions lead to drastically different outcomes. This behavior is what makes the Logistic Map ideal for generating unpredictable waveforms. In a random system, sound generated each time differs, with that comes nothing but uncertainty. But in a chaotic system, we start off at a certain state,  as parameters changes over time the system generates more randomness. Finding the boundaries between chaos and order through experiments can result in very interesting sounds.
+A **waveform scope** on the left displays the live output so you can see the relationship between your parameter changes and the resulting signal.
 
-  
+---
 
-## Parameters
+## MOD Section
 
-![Example Image](assets/interface.png)
+These controls shape the chaotic modulation signal before it hits the carrier.
 
-Playing with these parameters to discover sounds:
+### R (Range: 3.2 – 4.0)
 
-### Mod
+This is the most important knob on the synth. It sets the $r$ parameter of the Logistic Map and directly determines the character of the modulation:
 
-**1.  Set initial value of $x_{n}$ and $r$ to reach find critical points of chaos. 
+- **3.2 – 3.0** — *Stable region.* The map converges to a fixed point. The modulator outputs a near-constant value, so the carrier sounds clean and static. Use this as your "safe" starting position.
+- **3.0 – 3.57** — *Periodic region.* The map begins period-doubling: first alternating between 2 values, then 4, then 8, and so on. You'll hear rhythmic, pulsing textures layered onto the carrier. Slowly sweeping $r$ through this range reveals the bifurcations one by one.
+- **3.57 – 4.0** — *Chaos region.* The map becomes chaotic. Tiny differences in state lead to wildly different outputs. The modulation becomes dense, noisy, and complex. This is where the synth produces its most distinctive timbres.
 
-- **Stable region**: $r \in [2.8, 3.0]$
-- **Periodic oscillation region**: $r \in [3.0, 3.57]$
-- **Chaos region**: $r \in [3.57, 4.0]$ , in this state little changes happen to $x_{n}$ can result in great changes.
-- **Beyond $r = 4.0$**: not used, as the logistic function becomes invalid. 
+> **Tip:** The boundary near 3.57 is the most sonically interesting zone. Dial in slowly — small movements here produce dramatic timbral shifts.
 
-**2.  Modulation
+### Chaos Freq
 
-- Change Chaos Freq : central frequency of the generated waveform.
-- Modulation: amount of modulation on carrier.
+Sets the central frequency (rate) of the chaotic waveform generator. This determines how fast the Logistic Map iterates and, by extension, the pitch-range of the modulation signal. Lower values produce slow, evolving modulation; higher values push the modulation into audio-rate territory for harsh, metallic FM textures.
 
-Feel free to change the range of knobs to get more possibilities.
+### Modulation
 
-### Carrier
+Controls the modulation depth — how much the chaotic signal affects the carrier's frequency. At zero, the carrier sounds unmodulated. As you increase this, the logistic waveform exerts more influence. Paired with a high $r$ value, high modulation depth produces extreme spectral content.
 
-- Basic Shapes
-- ADSR
-- Output level
+---
 
-### Pitch Shift
+## CARRIER Section
 
-Shift the global pitch in situations where tonal characteristics are needed.
+### Waveform Select (Tab Bar)
 
+Choose one of four carrier oscillator shapes:
 
+1. **Sine** (`cycle~`) — Pure tone. Best for hearing the modulation's effect in isolation.
+2. **Saw** (`phasor~`) — Harmonically rich. Adds brightness even before modulation.
+3. **Triangle** — Softer than saw, odd-harmonic content. Good middle ground.
+4. **Square** — Hollow, reedy character. Combined with chaotic modulation, can produce very aggressive sounds.
 
-## Next
+### ADSR Envelope
 
-- polyphonic voices
-- more modulators
-- wavetable for carrier
-- more algorithm possible: Henon Mapping, Chua's Circuit, Random Walk, Fractal Noise, Mandelbrot
+Standard four-stage amplitude envelope, each controlled by its own dial:
+
+- **Attack** — Time for the sound to reach full volume after a note-on.
+- **Decay** — Time to fall from peak to the sustain level.
+- **Sustain** — Level held while the note is held.
+- **Release** — Time to fade to silence after note-off.
+
+> **Tip:** Short attack + long release pairs well with chaotic modulation — you get an immediate hit followed by an evolving, unpredictable tail.
+
+### Gain (Horizontal Slider)
+
+Master output level. The signal passes through a limiter (`limi~`) before output, but it's still wise to keep this in check when exploring extreme modulation settings.
+
+---
+
+## GLOBAL PITCH Section
+
+These controls sit below the waveform display and affect the overall pitch of the output.
+
+### Transp (Transpose)
+
+Shifts the pitch of incoming MIDI notes in semitones. Use this to quickly move the synth into a different register without retuning your controller.
+
+### Glide
+
+Sets a portamento time. When you play a new note, the pitch slides from the previous note to the new one over this duration. At zero there is no glide; increase it for smooth, legato pitch transitions.
+
+### Quality
+
+A dropdown menu that sets the quality mode of the internal pitch shifter (`pitchshift~`). Higher quality uses more CPU but produces cleaner pitch-shifting artifacts. For most use cases, the default is fine — experiment if you hear unwanted artifacts at extreme transpose values.
+
+---
+
+## Planned Features
+
+- Polyphonic voices
+- Additional modulator sources
+- Wavetable option for the carrier oscillator
+- more chaotic algorithms 
